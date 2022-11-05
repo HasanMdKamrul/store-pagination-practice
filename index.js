@@ -37,6 +37,31 @@ const dbConnect = async () => {
 
 dbConnect();
 
+// ** database and collections
+
+const storeProductCollection = client.db("fakeStore").collection("products");
+
+// ** get the data from the database into the server
+
+app.get("/products", async (req, res) => {
+  try {
+    // ** no filter as we are requesting all the data from the db
+    const query = {};
+    const cursor = storeProductCollection.find(query);
+    const products = await cursor.toArray();
+    res.send({
+      success: true,
+      message: `Data succesfully got from DB`,
+      data: products,
+    });
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // ** app listen
 
 app.listen(port, () => console.log(`server is running at port ${port}`));
