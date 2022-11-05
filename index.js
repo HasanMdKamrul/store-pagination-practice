@@ -45,14 +45,24 @@ const storeProductCollection = client.db("fakeStore").collection("products");
 
 app.get("/products", async (req, res) => {
   try {
+    // ** perPageData and currentPage
+    // console.log(req.query.size, req.query.currentPage);
+    const perPageData = +req.query.size;
+    const currentPage = +req.query.currentPage;
     // ** no filter as we are requesting all the data from the db
     const query = {};
     const cursor = storeProductCollection.find(query);
-    const products = await cursor.toArray();
+    const products = await cursor
+      .skip(currentPage * perPageData)
+      .limit(perPageData)
+      .toArray();
+    const count = await storeProductCollection.estimatedDocumentCount();
+
     res.send({
       success: true,
       message: `Data succesfully got from DB`,
       data: products,
+      count,
     });
   } catch (error) {
     res.send({
